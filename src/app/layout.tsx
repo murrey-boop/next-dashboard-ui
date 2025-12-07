@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+// @ts-ignore - side-effect CSS import without type declarations; add a global d.ts for CSS modules to remove this ignore
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lama Dev School Management Dashboard",
-  description: "Next.js School Management System",
+  title: "School Management Dashboard",
+  description: "School Management System",
 };
 
 export default function RootLayout({
