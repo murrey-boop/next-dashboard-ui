@@ -5,11 +5,13 @@ const menuItems = [
   {
     title: "MENU",
     items: [
+      
       {
         icon: "/home.png",
         label: "Home",
         href: "/",
         visible: ["admin", "teacher", "student", "parent"],
+       
       },
       {
         icon: "/teacher.png",
@@ -130,7 +132,7 @@ const Menu=() => {
               className="flex items-center lg:justify-center gap-3 p-3 hover:bg-gray-400 rounded-md mt-2"
             
               >
-              <Image src={item.icon} alt={item.label} className="w-5 h-5"/>
+              <Image src={item.icon} alt={item.label} width={20} height={20}/>
               <span className="hidden lg:block">{item.label}</span>
             </Link>
           ))}

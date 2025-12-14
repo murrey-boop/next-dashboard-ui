@@ -10,7 +10,7 @@ function Navbar() {
             <input 
                 type="text" 
                 placeholder="Search..."
-                className="p-2 w-[200px] outline-none bg-transparent"
+                className="p-2 pl-8 w-[200px] outline-none bg-transparent"
             />
         </div>
         {/**ICON AND USER */}
