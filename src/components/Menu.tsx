@@ -1,95 +1,127 @@
+"use client"
+
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { gsap } from "gsap";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {
     title: "MENU",
     items: [
-      
       {
         icon: "/home.png",
         label: "Home",
-        href: "/",
+        href: "/admin",
         visible: ["admin", "teacher", "student", "parent"],
-       
       },
       {
         icon: "/teacher.png",
         label: "Teachers",
-        href: "/list/teachers",
+        href: "/teachers",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/student.png",
         label: "Students",
-        href: "/list/students",
+        href: "/students",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/parent.png",
         label: "Parents",
-        href: "/list/parents",
+        href: "/parent",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/subject.png",
         label: "Subjects",
-        href: "/list/subjects",
+        href: "/subjects",
         visible: ["admin"],
       },
       {
         icon: "/class.png",
         label: "Classes",
-        href: "/list/classes",
+        href: "/classes",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/lesson.png",
         label: "Lessons",
-        href: "/list/lessons",
+        href: "/lessons",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/exam.png",
         label: "Exams",
-        href: "/list/exams",
+        href: "/exams",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/assignment.png",
         label: "Assignments",
-        href: "/list/assignments",
+        href: "/assignments",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/result.png",
         label: "Results",
-        href: "/list/results",
+        href: "/results",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/attendance.png",
         label: "Attendance",
-        href: "/list/attendance",
+        href: "/attendance",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/calendar.png",
         label: "Events",
-        href: "/list/events",
+        href: "/events",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/message.png",
         label: "Messages",
-        href: "/list/messages",
+        href: "/messages",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/announcement.png",
         label: "Announcements",
-        href: "/list/announcements",
+        href: "/announcements",
         visible: ["admin", "teacher", "student", "parent"],
+      },
+    ],
+  },
+  {
+    title: "MANAGEMENT",
+    items: [
+      {
+        icon: "/finance.png",
+        label: "Fee Management",
+        href: "/admin/fees",
+        visible: ["admin"],
+      },
+      {
+        icon: "/subject.png",
+        label: "Subject Management",
+        href: "/admin/subjects",
+        visible: ["admin"],
+      },
+      {
+        icon: "/finance.png",
+        label: "Fee Information",
+        href: "/parent/fees",
+        visible: ["parent"],
+      },
+      {
+        icon: "/profile.png",
+        label: "Account Management",
+        href: "/admin/accounts",
+        visible: ["admin"],
       },
     ],
   },
@@ -118,29 +150,55 @@ const menuItems = [
   },
 ];
 
+const Menu = () => {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
-const Menu=() => {
+  useEffect(() => {
+    if (menuRef.current) {
+      const items = menuRef.current.querySelectorAll('.menu-item');
+      gsap.fromTo(
+        items,
+        { opacity: 0, x: -20 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.4,
+          stagger: 0.05,
+          ease: "power2.out"
+        }
+      );
+    }
+  }, []);
+
   return (
-    <div className="mt-4 text-sm">
-      {menuItems.map(i=> (
-        <div key={i.title} className="flex flex-col gap-2">
-          <span className="hidden lg:block text-gray-400 font-light px-4 mt-4">{i.title}</span>
-          {i.items.map(item=> (
-            <Link 
-              key={item.label} 
-              href={item.href} 
-              className="flex items-center lg:justify-center gap-3 p-3 hover:bg-gray-400 rounded-md mt-2"
-            
+    <div ref={menuRef} className="mt-4 text-sm">
+      {menuItems.map((section) => (
+        <div key={section.title} className="flex flex-col gap-2">
+          <span className="hidden lg:block text-gray-400 font-light px-4 mt-4">
+            {section.title}
+          </span>
+          {section.items.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`menu-item flex items-center lg:justify-start justify-center gap-3 p-3 rounded-md mt-2 transition-all ${
+                  isActive
+                    ? "bg-lamaSky text-gray-900 font-semibold"
+                    : "hover:bg-lamaSkyLight"
+                }`}
               >
-              <Image src={item.icon} alt={item.label} width={20} height={20}/>
-              <span className="hidden lg:block">{item.label}</span>
-            </Link>
-          ))}
+                <Image src={item.icon} alt={item.label} width={20} height={20} />
+                <span className="hidden lg:block">{item.label}</span>
+              </Link>
+            );
+          })}
         </div>
       ))}
     </div>
   );
-}
-
+};
 
 export default Menu;

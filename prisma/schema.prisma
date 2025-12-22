@@ -1,0 +1,552 @@
+
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== USER MANAGEMENT ====================
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+  STAFF
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum TeacherRole {
+  TEACHER
+  SENIOR_TEACHER
+  DEPUTY_HEAD
+  HEADTEACHER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      UserRole
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  admin   Admin?
+  teacher Teacher?
+  student Student?
+  parent  Parent?
+  staff   Staff?
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  photo     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+// ==================== ACADEMIC STRUCTURE ====================
+
+enum GradeLevel {
+  BABY_CLASS
+  PP1
+  PP2
+  GRADE_1
+  GRADE_2
+  GRADE_3
+  GRADE_4
+  GRADE_5
+  GRADE_6
+  GRADE_7
+  GRADE_8
+  GRADE_9
+}
+
+model Class {
+  id            String     @id @default(uuid())
+  name          String     @unique // e.g., "Grade 1A", "PP1 Blue"
+  gradeLevel    GradeLevel
+  capacity      Int        @default(40)
+  academicYear  String // e.g., "2024/2025"
+  classTeacherId String?    @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  students       Student[]
+  lessons        Lesson[]
+  exams          Exam[]
+  assignments    Assignment[]
+  attendance     Attendance[]
+  feeStructures  FeeStructure[]
+  classTeacher   Teacher?       @relation("ClassTeacher", fields: [classTeacherId], references: [id])
+  subjectsInClass SubjectClass[]
+
+  @@map("classes")
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String?  @unique // e.g., "MATH", "ENG"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  lessons     Lesson[]
+  exams       Exam[]
+  assignments Assignment[]
+  results     Result[]
+  classesWithSubject SubjectClass[]
+  teachersWithSubject TeacherSubject[]
+
+  @@map("subjects")
+}
+
+// Many-to-many relation tables
+model SubjectClass {
+  id        String   @id @default(uuid())
+  subjectId String
+  classId   String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([subjectId, classId])
+  @@map("subject_classes")
+}
+
+model TeacherSubject {
+  id        String   @id @default(uuid())
+  teacherId String
+  subjectId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([teacherId, subjectId])
+  @@map("teacher_subjects")
+}
+
+model TeacherClass {
+  id        String   @id @default(uuid())
+  teacherId String
+  classId   String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classRef  String // Store class name/reference
+  createdAt DateTime @default(now())
+
+  @@unique([teacherId, classId])
+  @@map("teacher_classes")
+}
+
+// ==================== STAFF & TEACHERS ====================
+
+model Teacher {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeNo String   @unique
+  tscNumber  String?  @unique // Teachers Service Commission Number
+  role       TeacherRole @default(TEACHER)
+  name       String
+  phone      String?
+  photo      String?
+  address    String?
+  dateOfBirth DateTime?
+  gender      Gender?
+  hireDate   DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  classTeacher   Class?           @relation("ClassTeacher")
+  lessons        Lesson[]
+  exams          Exam[]
+  assignments    Assignment[]
+  attendanceRecords Attendance[]
+  subjectsTeaching TeacherSubject[]
+  classesTeaching  TeacherClass[]
+
+  @@map("teachers")
+}
+
+model Staff {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeNo  String   @unique
+  name        String
+  phone       String?
+  photo       String?
+  address     String?
+  department  String // e.g., "Administration", "Maintenance", "Security"
+  position    String // e.g., "Accountant", "Cleaner", "Guard"
+  hireDate    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("staff")
+}
+
+// ==================== STUDENTS & PARENTS ====================
+
+model Student {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  admissionNo  String    @unique
+  name         String
+  photo        String?
+  dateOfBirth  DateTime
+  gender       Gender
+  address      String?
+  classId      String
+  class        Class     @relation(fields: [classId], references: [id])
+  parentId     String?
+  parent       Parent?   @relation(fields: [parentId], references: [id])
+  admissionDate DateTime @default(now())
+  isActive     Boolean   @default(true)
+  medicalInfo  String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  results        Result[]
+  attendance     Attendance[]
+  assignments    AssignmentSubmission[]
+  feeBalances    FeeBalance?
+  feePayments    FeePayment[]
+  invoices       Invoice[]
+
+  @@map("students")
+}
+
+model Parent {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String
+  email       String
+  address     String?
+  occupation  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  students Student[]
+
+  @@map("parents")
+}
+
+// ==================== FEE MANAGEMENT ====================
+
+enum Term {
+  TERM_1 // Jan-Mar
+  TERM_2 // May-Jul
+  TERM_3 // Sep-Nov
+}
+
+enum FeeCategory {
+  TUITION
+  LIBRARY
+  SPORTS
+  TRANSPORT
+  LUNCH
+  EXAMINATION
+  UNIFORM
+  TRIP
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  M_PESA
+  BANK_TRANSFER
+  CASH
+  CHEQUE
+}
+
+model AcademicTerm {
+  id           String   @id @default(uuid())
+  name         Term
+  academicYear String // e.g., "2024/2025"
+  startDate    DateTime
+  endDate      DateTime
+  openingDate  DateTime
+  closingDate  DateTime
+  isActive     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  feeStructures FeeStructure[]
+  feePayments   FeePayment[]
+  invoices      Invoice[]
+
+  @@unique([name, academicYear])
+  @@map("academic_terms")
+}
+
+model FeeStructure {
+  id           String      @id @default(uuid())
+  classId      String
+  class        Class       @relation(fields: [classId], references: [id])
+  termId       String
+  term         AcademicTerm @relation(fields: [termId], references: [id])
+  category     FeeCategory
+  amount       Decimal     @db.Decimal(10, 2)
+  description  String?
+  dueDate      DateTime
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([classId, termId, category])
+  @@map("fee_structures")
+}
+
+model FeeBalance {
+  id           String        @id @default(uuid())
+  studentId    String        @unique
+  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  totalFees    Decimal       @db.Decimal(10, 2) @default(0)
+  amountPaid   Decimal       @db.Decimal(10, 2) @default(0)
+  balance      Decimal       @db.Decimal(10, 2) @default(0)
+  status       PaymentStatus @default(PENDING)
+  lastPayment  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("fee_balances")
+}
+
+model FeePayment {
+  id              String        @id @default(uuid())
+  studentId       String
+  student         Student       @relation(fields: [studentId], references: [id])
+  termId          String
+  term            AcademicTerm  @relation(fields: [termId], references: [id])
+  amount          Decimal       @db.Decimal(10, 2)
+  paymentMethod   PaymentMethod
+  referenceNo     String        @unique // M-PESA code or Bank ref
+  transactionDate DateTime      @default(now())
+  confirmedBy     String? // Admin who confirmed
+  remarks         String?
+  receiptData     Bytes? // Store PDF receipt as binary
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("fee_payments")
+}
+
+model Invoice {
+  id          String   @id @default(uuid())
+  invoiceNo   String   @unique
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  termId      String
+  term        AcademicTerm @relation(fields: [termId], references: [id])
+  amount      Decimal  @db.Decimal(10, 2)
+  dueDate     DateTime
+  status      PaymentStatus @default(PENDING)
+  invoiceData Bytes? // Store PDF invoice as binary
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("invoices")
+}
+
+// ==================== ACADEMIC OPERATIONS ====================
+
+model Lesson {
+  id          String   @id @default(uuid())
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  dayOfWeek   Int // 0-6 (Sunday-Saturday)
+  startTime   String // e.g., "08:00"
+  endTime     String // e.g., "09:00"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("lessons")
+}
+
+model Exam {
+  id          String   @id @default(uuid())
+  title       String
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  examDate    DateTime
+  totalMarks  Int
+  duration    Int? // in minutes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  results Result[]
+
+  @@map("exams")
+}
+
+model Result {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  examId    String
+  exam      Exam     @relation(fields: [examId], references: [id])
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  marks     Decimal  @db.Decimal(5, 2)
+  grade     String?
+  remarks   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, examId])
+  @@map("results")
+}
+
+model Assignment {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  dueDate     DateTime
+  totalMarks  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  submissions AssignmentSubmission[]
+
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String    @id @default(uuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  studentId    String
+  student      Student   @relation(fields: [studentId], references: [id])
+  submittedAt  DateTime?
+  marks        Decimal?  @db.Decimal(5, 2)
+  feedback     String?   @db.Text
+  fileData     Bytes? // Store submission file
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([assignmentId, studentId])
+  @@map("assignment_submissions")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id])
+  classId   String
+  class     Class            @relation(fields: [classId], references: [id])
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  remarks   String?
+  markedBy  String
+  teacher   Teacher          @relation(fields: [markedBy], references: [id])
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([studentId, date])
+  @@map("attendance")
+}
+
+// ==================== COMMUNICATION ====================
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  targetRoles UserRole[]
+  priority    String   @default("normal") // normal, important, urgent
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  eventDate   DateTime
+  location    String?
+  targetRoles UserRole[]
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("events")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  subject    String
+  content    String   @db.Text
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("messages")
+}
