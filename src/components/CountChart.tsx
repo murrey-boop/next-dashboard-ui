@@ -38,8 +38,8 @@ function CountChart() {
             <Image src="/moreDark.png" alt="more" width={20} height={20} className="cursor-pointer"/>
         </div>
         {/**CHART */ }
-        <div className="relative w-full flex-1 flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+        <div className="relative w-full flex-1 flex items-center justify-center" style={{ minHeight: 200 }}>
+          <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart
               cx="50%"
               cy="50%"

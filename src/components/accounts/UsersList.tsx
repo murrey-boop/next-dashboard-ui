@@ -101,6 +101,7 @@ export default function UsersList() {
         </div>
         <div>
           <select
+            aria-label="Filter by role"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2"

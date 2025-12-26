@@ -66,3 +66,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Chart minimum heights */
+  .chart-min-h-200 {
+    min-height: 200px;
+  }
+  .chart-min-h-300 {
+    min-height: 300px;
+  }
+  /* Progress bar widths - dynamic values */
+  .progress-bar {
+    transition: width 0.5s ease;
+  }
+}

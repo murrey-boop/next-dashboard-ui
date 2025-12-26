@@ -172,8 +172,9 @@ export default function FeeStructures() {
           className="bg-gray-50 p-6 rounded-lg mb-6 grid grid-cols-2 gap-4"
         >
           <div>
-            <label className="block text-sm font-medium mb-1">Class</label>
+            <label htmlFor="fee-class" className="block text-sm font-medium mb-1">Class</label>
             <select
+              id="fee-class"
               value={formData.classId}
               onChange={(e) =>
                 setFormData({ ...formData, classId: e.target.value })
@@ -191,8 +192,9 @@ export default function FeeStructures() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Term</label>
+            <label htmlFor="fee-term" className="block text-sm font-medium mb-1">Term</label>
             <select
+              id="fee-term"
               value={formData.termId}
               onChange={(e) =>
                 setFormData({ ...formData, termId: e.target.value })
@@ -210,10 +212,11 @@ export default function FeeStructures() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="fee-tuition" className="block text-sm font-medium mb-1">
               Tuition Fee (KES)
             </label>
             <input
+              id="fee-tuition"
               type="number"
               value={formData.tuitionFee}
               onChange={(e) =>
@@ -226,10 +229,11 @@ export default function FeeStructures() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="fee-transport" className="block text-sm font-medium mb-1">
               Transport Fee (KES)
             </label>
             <input
+              id="fee-transport"
               type="number"
               value={formData.transportFee}
               onChange={(e) =>
@@ -242,10 +246,11 @@ export default function FeeStructures() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="fee-activity" className="block text-sm font-medium mb-1">
               Activity Fee (KES)
             </label>
             <input
+              id="fee-activity"
               type="number"
               value={formData.activityFee}
               onChange={(e) =>
@@ -258,10 +263,11 @@ export default function FeeStructures() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="fee-exam" className="block text-sm font-medium mb-1">
               Exam Fee (KES)
             </label>
             <input
+              id="fee-exam"
               type="number"
               value={formData.examFee}
               onChange={(e) =>
@@ -274,8 +280,9 @@ export default function FeeStructures() {
           </div>
 
           <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Due Date</label>
+            <label htmlFor="fee-due-date" className="block text-sm font-medium mb-1">Due Date</label>
             <input
+              id="fee-due-date"
               type="date"
               value={formData.dueDate}
               onChange={(e) =>

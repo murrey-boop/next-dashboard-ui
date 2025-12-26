@@ -1,5 +1,4 @@
 
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -17,6 +16,7 @@ enum UserRole {
   STUDENT
   PARENT
   STAFF
+  SUPPORT_STAFF
 }
 
 enum Gender {
@@ -38,6 +38,18 @@ model User {
   password  String
   role      UserRole
   isActive  Boolean  @default(true)
+  
+  // Support Staff fields
+  name        String?
+  employeeNo  String?  @unique
+  phone       String?
+  photo       String?
+  department  String?  // KITCHEN, TRANSPORT, MAINTENANCE, SECURITY, CLEANING, ADMIN
+  salary      Decimal? @db.Decimal(10, 2)
+  hireDate    DateTime?
+  workHistory Json?    // Array of work history entries
+  achievements Json?   // Array of achievements
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -103,6 +115,9 @@ model Class {
   feeStructures  FeeStructure[]
   classTeacher   Teacher?       @relation("ClassTeacher", fields: [classTeacherId], references: [id])
   subjectsInClass SubjectClass[]
+  announcements  Announcement[]
+  events         CalendarEvent[]
+  resources      Resource[]
 
   @@map("classes")
 }
@@ -122,6 +137,7 @@ model Subject {
   results     Result[]
   classesWithSubject SubjectClass[]
   teachersWithSubject TeacherSubject[]
+  resources   Resource[]
 
   @@map("subjects")
 }
@@ -190,6 +206,7 @@ model Teacher {
   attendanceRecords Attendance[]
   subjectsTeaching TeacherSubject[]
   classesTeaching  TeacherClass[]
+  behaviorIncidents BehaviorIncident[]
 
   @@map("teachers")
 }
@@ -241,6 +258,8 @@ model Student {
   feeBalances    FeeBalance?
   feePayments    FeePayment[]
   invoices       Invoice[]
+  behaviorIncidents BehaviorIncident[]
+  buses          StudentBus[]
 
   @@map("students")
 }
@@ -399,6 +418,7 @@ model Lesson {
   dayOfWeek   Int // 0-6 (Sunday-Saturday)
   startTime   String // e.g., "08:00"
   endTime     String // e.g., "09:00"
+  room        String? // e.g., "Room 101"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -456,6 +476,8 @@ model Assignment {
   teacher     Teacher  @relation(fields: [teacherId], references: [id])
   dueDate     DateTime
   totalMarks  Int
+  attachmentData String? @db.Text
+  attachmentName String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -509,33 +531,6 @@ model Attendance {
 
 // ==================== COMMUNICATION ====================
 
-model Announcement {
-  id          String   @id @default(uuid())
-  title       String
-  content     String   @db.Text
-  targetRoles UserRole[]
-  priority    String   @default("normal") // normal, important, urgent
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("announcements")
-}
-
-model Event {
-  id          String   @id @default(uuid())
-  title       String
-  description String   @db.Text
-  eventDate   DateTime
-  location    String?
-  targetRoles UserRole[]
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("events")
-}
-
 model Message {
   id         String   @id @default(uuid())
   senderId   String
@@ -549,4 +544,114 @@ model Message {
   updatedAt  DateTime @updatedAt
 
   @@map("messages")
+}
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  targetRole  UserRole? // null means all users
+  classId     String?  // specific class if targeted
+  class       Class?   @relation(fields: [classId], references: [id])
+  priority    String   @default("NORMAL") // NORMAL, IMPORTANT, URGENT
+  publishedBy String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model CalendarEvent {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  eventDate   DateTime
+  endDate     DateTime?
+  eventType   String   // HOLIDAY, EXAM, MEETING, SPORTS, OTHER
+  classId     String?  // null means school-wide
+  class       Class?   @relation(fields: [classId], references: [id])
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("calendar_events")
+}
+
+model BehaviorIncident {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  incidentType String  // POSITIVE, NEGATIVE, NEUTRAL
+  category    String   // DISCIPLINE, ACADEMIC, SOCIAL, OTHER
+  title       String
+  description String   @db.Text
+  severity    String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  actionTaken String?  @db.Text
+  incidentDate DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("behavior_incidents")
+}
+
+model Resource {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  fileUrl     String?
+  fileData    String?  @db.Text // base64 for uploaded files
+  fileName    String?
+  fileType    String?  // PDF, DOC, VIDEO, LINK, etc.
+  subjectId   String?
+  subject     Subject? @relation(fields: [subjectId], references: [id])
+  classId     String?
+  class       Class?   @relation(fields: [classId], references: [id])
+  uploadedBy  String
+  isPublic    Boolean  @default(true)
+  downloads   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("resources")
+}
+
+// ==================== TRANSPORTATION ====================
+
+enum BusStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
+model Bus {
+  id             String    @id @default(uuid())
+  registrationNo String    @unique
+  capacity       Int
+  driverName     String?
+  route          String?   // e.g., "CBD - Westlands"
+  status         BusStatus @default(ACTIVE)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  students StudentBus[]
+
+  @@map("buses")
+}
+
+model StudentBus {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  busId     String
+  bus       Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+  feeAmount Decimal  @default(0) @db.Decimal(10, 2) // Monthly bus fee
+  assignedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, busId])
+  @@map("student_buses")
 }

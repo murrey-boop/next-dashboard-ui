@@ -115,8 +115,9 @@ export default function FeeReports() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Fee Collection Reports</h2>
         <div>
-          <label className="mr-2 text-sm font-medium">Select Term:</label>
+          <label htmlFor="term-select" className="mr-2 text-sm font-medium">Select Term:</label>
           <select
+            id="term-select"
             value={selectedTerm}
             onChange={(e) => setSelectedTerm(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2"
@@ -262,8 +263,8 @@ export default function FeeReports() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ method, amount }) =>
-                  `${method}: KES ${amount.toLocaleString()}`
+                label={(entry: any) =>
+                  `${entry.method}: KES ${entry.amount.toLocaleString()}`
                 }
                 outerRadius={80}
                 fill="#8884d8"

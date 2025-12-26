@@ -243,8 +243,9 @@ export default function PaymentRecording() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Term</label>
+            <label htmlFor="term-select" className="block text-sm font-medium mb-1">Term</label>
             <select
+              id="term-select"
               value={formData.termId}
               onChange={(e) =>
                 setFormData({ ...formData, termId: e.target.value })
@@ -273,10 +274,11 @@ export default function PaymentRecording() {
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="payment-amount" className="block text-sm font-medium mb-1">
               Amount (KES)
             </label>
             <input
+              id="payment-amount"
               type="number"
               value={formData.amount}
               onChange={(e) =>
@@ -289,10 +291,11 @@ export default function PaymentRecording() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="payment-method" className="block text-sm font-medium mb-1">
               Payment Method
             </label>
             <select
+              id="payment-method"
               value={formData.paymentMethod}
               onChange={(e) =>
                 setFormData({
@@ -311,10 +314,11 @@ export default function PaymentRecording() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="transaction-ref" className="block text-sm font-medium mb-1">
               Transaction Reference
             </label>
             <input
+              id="transaction-ref"
               type="text"
               value={formData.transactionRef}
               onChange={(e) =>
@@ -326,10 +330,11 @@ export default function PaymentRecording() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="payment-date" className="block text-sm font-medium mb-1">
               Payment Date
             </label>
             <input
+              id="payment-date"
               type="date"
               value={formData.paymentDate}
               onChange={(e) =>

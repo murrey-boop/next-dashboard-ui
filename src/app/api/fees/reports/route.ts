@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const students = await prisma.student.findMany({
       include: {
         class: true,
-        feeBalance: true,
+        feeBalances: true,
       },
     });
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     
     // Calculate expected revenue from all students (simplified)
     const totalExpectedRevenue = students.reduce(
-      (sum, s) => sum + (s.feeBalance ? Number((s.feeBalance as any).totalFees) : 0),
+      (sum, s) => sum + (s.feeBalances ? Number(s.feeBalances.totalFees) : 0),
       0
     );
     
@@ -64,12 +64,12 @@ export async function GET(request: NextRequest) {
         : 0;
 
     const totalStudents = students.length;
-    const paidStudents = students.filter((s) => s.feeBalance && (s.feeBalance as any).status === "PAID").length;
+    const paidStudents = students.filter((s) => s.feeBalances && s.feeBalances.status === "PAID").length;
     const partialStudents = students.filter(
-      (s) => s.feeBalance && (s.feeBalance as any).status === "PARTIAL"
+      (s) => s.feeBalances && s.feeBalances.status === "PARTIAL"
     ).length;
     const pendingStudents = students.filter(
-      (s) => s.feeBalance && (s.feeBalance as any).status === "PENDING"
+      (s) => s.feeBalances && s.feeBalances.status === "PENDING"
     ).length;
 
     // By Class - group payments by student class
@@ -85,8 +85,8 @@ export async function GET(request: NextRequest) {
         collected: 0,
       };
       byClassMap.set(className, {
-        expected: existing.expected + (s.feeBalance ? Number((s.feeBalance as any).totalFees) : 0),
-        collected: existing.collected + (s.feeBalance ? Number((s.feeBalance as any).amountPaid) : 0),
+        expected: existing.expected + (s.feeBalances ? Number(s.feeBalances.totalFees) : 0),
+        collected: existing.collected + (s.feeBalances ? Number(s.feeBalances.amountPaid) : 0),
       });
     });
 

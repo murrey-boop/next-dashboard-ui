@@ -51,7 +51,7 @@ function AttendaceChart() {
           <Image src="/moreDark.png" alt="more" width={20} height={20} className="cursor-pointer"/>
       </div>
       <div className="flex-1 w-full" style={{ minHeight: 200 }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             barSize={20}

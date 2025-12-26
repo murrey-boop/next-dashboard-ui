@@ -18,7 +18,7 @@ export async function GET() {
         students: {
           include: {
             class: true,
-            feeBalance: true,
+            feeBalances: true,
             feePayments: {
               orderBy: {
                 transactionDate: "desc",
@@ -41,13 +41,13 @@ export async function GET() {
       admissionNumber: student.admissionNo,
       className: student.class.name,
       photo: student.photo,
-      balances: student.feeBalance ? [{
-        id: student.feeBalance.id,
+      balances: student.feeBalances ? [{
+        id: student.feeBalances.id,
         termName: 'Current Term',
-        totalFees: Number(student.feeBalance.totalFees),
-        paidAmount: Number(student.feeBalance.amountPaid),
-        balance: Number(student.feeBalance.balance),
-        status: student.feeBalance.status,
+        totalFees: Number(student.feeBalances.totalFees),
+        paidAmount: Number(student.feeBalances.amountPaid),
+        balance: Number(student.feeBalances.balance),
+        status: student.feeBalances.status,
         dueDate: new Date().toISOString(),
       }] : [],
       payments: student.feePayments.map((p: any) => ({

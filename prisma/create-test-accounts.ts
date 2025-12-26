@@ -1,5 +1,17 @@
-import prisma from "../src/lib/prisma";
+import { config } from "dotenv";
+config();
+
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pkg from "pg";
+const { Pool } = pkg;
 import bcrypt from "bcryptjs";
+
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function createTestAccounts() {
   const hashedPassword = await bcrypt.hash("School@123", 10);
@@ -37,7 +49,6 @@ async function createTestAccounts() {
           create: {
             name: "Jane Smith",
             employeeNo: "TCH2025001",
-            role: "TEACHER",
             phone: "+254700000002",
             dateOfBirth: new Date("1990-05-15"),
             gender: "FEMALE",

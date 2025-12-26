@@ -150,8 +150,9 @@ export default function DefaultersList() {
       {/* Filters */}
       <div className="bg-gray-50 p-4 rounded-lg mb-4 grid grid-cols-4 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Class</label>
+          <label htmlFor="class-filter" className="block text-sm font-medium mb-1">Class</label>
           <select
+            id="class-filter"
             value={filters.classId}
             onChange={(e) => handleFilterChange("classId", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2"
@@ -166,8 +167,9 @@ export default function DefaultersList() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Term</label>
+          <label htmlFor="term-filter" className="block text-sm font-medium mb-1">Term</label>
           <select
+            id="term-filter"
             value={filters.termId}
             onChange={(e) => handleFilterChange("termId", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2"

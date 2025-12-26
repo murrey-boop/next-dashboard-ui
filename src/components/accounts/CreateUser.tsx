@@ -205,8 +205,9 @@ export default function CreateUser() {
         {/* Common Fields */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">First Name *</label>
+            <label htmlFor="first-name" className="block text-sm font-medium mb-1">First Name *</label>
             <input
+              id="first-name"
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -216,8 +217,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Last Name *</label>
+            <label htmlFor="last-name" className="block text-sm font-medium mb-1">Last Name *</label>
             <input
+              id="last-name"
               type="text"
               value={formData.surname}
               onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
@@ -227,8 +229,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Email *</label>
+            <label htmlFor="user-email" className="block text-sm font-medium mb-1">Email *</label>
             <input
+              id="user-email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -238,8 +241,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Phone</label>
+            <label htmlFor="user-phone" className="block text-sm font-medium mb-1">Phone</label>
             <input
+              id="user-phone"
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -249,8 +253,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Date of Birth *</label>
+            <label htmlFor="birthday" className="block text-sm font-medium mb-1">Date of Birth *</label>
             <input
+              id="birthday"
               type="date"
               value={formData.birthday}
               onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
@@ -260,8 +265,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Sex *</label>
+            <label htmlFor="user-sex" className="block text-sm font-medium mb-1">Sex *</label>
             <select
+              id="user-sex"
               value={formData.sex}
               onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
@@ -273,8 +279,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Blood Type</label>
+            <label htmlFor="blood-type" className="block text-sm font-medium mb-1">Blood Type</label>
             <select
+              id="blood-type"
               value={formData.bloodType}
               onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
@@ -292,8 +299,9 @@ export default function CreateUser() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Address</label>
+            <label htmlFor="user-address" className="block text-sm font-medium mb-1">Address</label>
             <input
+              id="user-address"
               type="text"
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -308,10 +316,11 @@ export default function CreateUser() {
             <h3 className="font-semibold text-blue-900">Student Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label htmlFor="admission-number" className="block text-sm font-medium mb-1">
                   Admission Number (Auto-generated)
                 </label>
                 <input
+                  id="admission-number"
                   type="text"
                   value={formData.admissionNumber}
                   readOnly
@@ -320,8 +329,9 @@ export default function CreateUser() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Class *</label>
+                <label htmlFor="student-class" className="block text-sm font-medium mb-1">Class *</label>
                 <select
+                  id="student-class"
                   value={formData.classId}
                   onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
@@ -367,25 +377,30 @@ export default function CreateUser() {
                 </div>
 
                 {!createNewParent ? (
-                  <select
-                    value={formData.parentId}
-                    onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  >
-                    <option value="">No parent (Optional)</option>
-                    {parents.map((parent) => (
-                      <option key={parent.id} value={parent.id}>
-                        {parent.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div>
+                    <label htmlFor="parent-select" className="block text-sm font-medium mb-1">Select Parent</label>
+                    <select
+                      id="parent-select"
+                      value={formData.parentId}
+                      onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    >
+                      <option value="">No parent (Optional)</option>
+                      {parents.map((parent) => (
+                        <option key={parent.id} value={parent.id}>
+                          {parent.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 ) : (
                   <div className="space-y-3 p-4 bg-white rounded-lg border-2 border-blue-200">
                     <p className="text-sm text-blue-700 font-medium">Parent account will be created automatically</p>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium mb-1">Parent First Name *</label>
+                        <label htmlFor="parent-first-name" className="block text-xs font-medium mb-1">Parent First Name *</label>
                         <input
+                          id="parent-first-name"
                           type="text"
                           value={formData.parentName}
                           onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
@@ -395,8 +410,9 @@ export default function CreateUser() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium mb-1">Parent Last Name *</label>
+                        <label htmlFor="parent-last-name" className="block text-xs font-medium mb-1">Parent Last Name *</label>
                         <input
+                          id="parent-last-name"
                           type="text"
                           value={formData.parentSurname}
                           onChange={(e) => setFormData({ ...formData, parentSurname: e.target.value })}
@@ -406,8 +422,9 @@ export default function CreateUser() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium mb-1">Parent Email *</label>
+                        <label htmlFor="parent-email" className="block text-xs font-medium mb-1">Parent Email *</label>
                         <input
+                          id="parent-email"
                           type="email"
                           value={formData.parentEmail}
                           onChange={(e) => setFormData({ ...formData, parentEmail: e.target.value })}
@@ -417,8 +434,9 @@ export default function CreateUser() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium mb-1">Parent Phone *</label>
+                        <label htmlFor="parent-phone" className="block text-xs font-medium mb-1">Parent Phone *</label>
                         <input
+                          id="parent-phone"
                           type="tel"
                           value={formData.parentPhone}
                           onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
@@ -442,10 +460,11 @@ export default function CreateUser() {
             <h3 className="font-semibold text-green-900">Teacher Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label htmlFor="employee-number" className="block text-sm font-medium mb-1">
                   Employee Number (Auto-generated)
                 </label>
                 <input
+                  id="employee-number"
                   type="text"
                   value={formData.employeeNumber}
                   readOnly
@@ -454,10 +473,11 @@ export default function CreateUser() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label htmlFor="tsc-number" className="block text-sm font-medium mb-1">
                   TSC Number (Optional)
                 </label>
                 <input
+                  id="tsc-number"
                   type="text"
                   value={formData.tscNumber}
                   onChange={(e) =>
@@ -469,8 +489,9 @@ export default function CreateUser() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Teacher Position/Role *</label>
+                <label htmlFor="teacher-role" className="block text-sm font-medium mb-1">Teacher Position/Role *</label>
                 <select
+                  id="teacher-role"
                   value={formData.teacherRole}
                   onChange={(e) =>
                     setFormData({ ...formData, teacherRole: e.target.value })
@@ -486,8 +507,9 @@ export default function CreateUser() {
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium mb-1">Qualification</label>
+                <label htmlFor="qualification" className="block text-sm font-medium mb-1">Qualification</label>
                 <input
+                  id="qualification"
                   type="text"
                   value={formData.qualification}
                   onChange={(e) =>
@@ -505,8 +527,9 @@ export default function CreateUser() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Subject 1 *</label>
+                      <label htmlFor="subject-1" className="block text-xs text-gray-600 mb-1">Subject 1 *</label>
                       <input
+                        id="subject-1"
                         type="text"
                         value={formData.subject1}
                         onChange={(e) => setFormData({ ...formData, subject1: e.target.value })}
@@ -516,8 +539,9 @@ export default function CreateUser() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Subject 2 *</label>
+                      <label htmlFor="subject-2" className="block text-xs text-gray-600 mb-1">Subject 2 *</label>
                       <input
+                        id="subject-2"
                         type="text"
                         value={formData.subject2}
                         onChange={(e) => setFormData({ ...formData, subject2: e.target.value })}
@@ -527,8 +551,9 @@ export default function CreateUser() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Subject 3 *</label>
+                      <label htmlFor="subject-3" className="block text-xs text-gray-600 mb-1">Subject 3 *</label>
                       <input
+                        id="subject-3"
                         type="text"
                         value={formData.subject3}
                         onChange={(e) => setFormData({ ...formData, subject3: e.target.value })}
@@ -540,8 +565,9 @@ export default function CreateUser() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Subject 4 (Optional)</label>
+                      <label htmlFor="subject-4" className="block text-xs text-gray-600 mb-1">Subject 4 (Optional)</label>
                       <input
+                        id="subject-4"
                         type="text"
                         value={formData.subject4}
                         onChange={(e) => setFormData({ ...formData, subject4: e.target.value })}
@@ -550,8 +576,9 @@ export default function CreateUser() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Subject 5 (Optional)</label>
+                      <label htmlFor="subject-5" className="block text-xs text-gray-600 mb-1">Subject 5 (Optional)</label>
                       <input
+                        id="subject-5"
                         type="text"
                         value={formData.subject5}
                         onChange={(e) => setFormData({ ...formData, subject5: e.target.value })}
@@ -572,10 +599,11 @@ export default function CreateUser() {
             <h3 className="font-semibold text-yellow-900">Staff Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label htmlFor="staff-employee-number" className="block text-sm font-medium mb-1">
                   Employee Number (Auto-generated)
                 </label>
                 <input
+                  id="staff-employee-number"
                   type="text"
                   value={formData.employeeNumber}
                   readOnly
@@ -584,8 +612,9 @@ export default function CreateUser() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Position/Role</label>
+                <label htmlFor="staff-position" className="block text-sm font-medium mb-1">Position/Role</label>
                 <input
+                  id="staff-position"
                   type="text"
                   value={formData.qualification}
                   onChange={(e) =>

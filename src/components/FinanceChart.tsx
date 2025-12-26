@@ -76,7 +76,7 @@ function FinanceChart() {
         <Image src="/moreDark.png" alt="more" width={20} height={20} className="cursor-pointer" />
       </div>
       <div className="flex-1 w-full" style={{ minHeight: 300 }}>
-        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             margin={{

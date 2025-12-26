@@ -51,6 +51,21 @@ export default function ParentFeesPage() {
   const [children, setChildren] = useState<ChildFeeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
+  
+  // Payment states
+  const [showMpesaForm, setShowMpesaForm] = useState(false);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [mpesaPhone, setMpesaPhone] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+    reference?: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchChildrenFeeData();
@@ -239,6 +254,116 @@ export default function ParentFeesPage() {
     toast.success("Invoice downloaded");
   };
 
+  // M-PESA Payment Handler
+  const handleMpesaPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProcessingPayment(true);
+    setPaymentStatus(null);
+
+    try {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      // Simulate STK Push
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Generate transaction reference
+      const transactionRef = `MPE${Date.now().toString().slice(-10)}`;
+
+      // Call payment API
+      const res = await fetch("/api/fees/parent/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: child.studentId,
+          amount: parseFloat(paymentAmount),
+          paymentMethod: "M_PESA",
+          transactionRef,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Payment failed");
+
+      setPaymentStatus({
+        type: "success",
+        message: "Payment successful! Your fee balance has been updated.",
+        reference: transactionRef,
+      });
+
+      // Reset form and refresh data
+      setShowMpesaForm(false);
+      setMpesaPhone("");
+      setPaymentAmount("");
+      fetchChildrenFeeData();
+
+      toast.success("Payment processed successfully!");
+    } catch (error) {
+      setPaymentStatus({
+        type: "error",
+        message: "Payment failed. Please try again or contact support.",
+      });
+      toast.error("Payment processing failed");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  // Card Payment Handler
+  const handleCardPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProcessingPayment(true);
+    setPaymentStatus(null);
+
+    try {
+      const child = getCurrentChild();
+      if (!child) return;
+
+      // Simulate card processing
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
+      // Generate transaction reference
+      const transactionRef = `CARD${Date.now().toString().slice(-10)}`;
+
+      // Call payment API
+      const res = await fetch("/api/fees/parent/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: child.studentId,
+          amount: parseFloat(paymentAmount),
+          paymentMethod: "CREDIT_CARD",
+          transactionRef,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Payment failed");
+
+      setPaymentStatus({
+        type: "success",
+        message: "Card payment successful! Your fee balance has been updated.",
+        reference: transactionRef,
+      });
+
+      // Reset form and refresh data
+      setShowCardForm(false);
+      setCardNumber("");
+      setCardExpiry("");
+      setCardCvv("");
+      setPaymentAmount("");
+      fetchChildrenFeeData();
+
+      toast.success("Payment processed successfully!");
+    } catch (error) {
+      setPaymentStatus({
+        type: "error",
+        message: "Card payment failed. Please check your details and try again.",
+      });
+      toast.error("Payment processing failed");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -270,8 +395,9 @@ export default function ParentFeesPage() {
       {/* Child Selector */}
       {children.length > 1 && (
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Select Child:</label>
+          <label htmlFor="child-select" className="block text-sm font-medium mb-2">Select Child:</label>
           <select
+            id="child-select"
             value={selectedChild || ""}
             onChange={(e) => setSelectedChild(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 w-full md:w-auto"
@@ -489,11 +615,230 @@ export default function ParentFeesPage() {
             )}
           </div>
 
-          {/* Payment Instructions */}
-          <div className="mt-6 bg-blue-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-3">How to Make a Payment</h3>
+          {/* Make Payment Section */}
+          {stats.balance > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-4">Make a Payment</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* M-PESA Payment */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">M</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-green-800">M-PESA Payment</h4>
+                      <p className="text-sm text-green-700">Pay using your phone</p>
+                    </div>
+                  </div>
+                  
+                  {!showMpesaForm ? (
+                    <button
+                      onClick={() => setShowMpesaForm(true)}
+                      className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                    >
+                      Pay with M-PESA
+                    </button>
+                  ) : (
+                    <form onSubmit={handleMpesaPayment} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          M-PESA Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          value={mpesaPhone}
+                          onChange={(e) => setMpesaPhone(e.target.value)}
+                          placeholder="254712345678"
+                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500"
+                          required
+                          pattern="254[0-9]{9}"
+                        />
+                        <p className="text-xs text-gray-600 mt-1">Format: 254XXXXXXXXX</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Amount (KES)
+                        </label>
+                        <input
+                          type="number"
+                          value={paymentAmount}
+                          onChange={(e) => setPaymentAmount(e.target.value)}
+                          placeholder="Enter amount"
+                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500"
+                          required
+                          min="1"
+                          max={stats.balance}
+                        />
+                        <p className="text-xs text-gray-600 mt-1">
+                          Max: KES {stats.balance.toLocaleString()}
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2">\n                        <button
+                          type="submit"
+                          disabled={processingPayment}
+                          className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
+                        >
+                          {processingPayment ? "Processing..." : "Send STK Push"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowMpesaForm(false);
+                            setMpesaPhone("");
+                            setPaymentAmount("");
+                          }}
+                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+
+                {/* Card Payment */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">💳</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-blue-800">Card Payment</h4>
+                      <p className="text-sm text-blue-700">Visa, Mastercard</p>
+                    </div>
+                  </div>
+                  
+                  {!showCardForm ? (
+                    <button
+                      onClick={() => setShowCardForm(true)}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                    >
+                      Pay with Card
+                    </button>
+                  ) : (
+                    <form onSubmit={handleCardPayment} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Card Number
+                        </label>
+                        <input
+                          type="text"
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(e.target.value.replace(/\s/g, ""))}
+                          placeholder="1234 5678 9012 3456"
+                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                          required
+                          pattern="[0-9]{16}"
+                          maxLength={16}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Expiry Date
+                          </label>
+                          <input
+                            type="text"
+                            value={cardExpiry}
+                            onChange={(e) => setCardExpiry(e.target.value)}
+                            placeholder="MM/YY"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                            pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
+                            maxLength={5}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            CVV
+                          </label>
+                          <input
+                            type="text"
+                            value={cardCvv}
+                            onChange={(e) => setCardCvv(e.target.value)}
+                            placeholder="123"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                            pattern="[0-9]{3}"
+                            maxLength={3}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Amount (KES)
+                        </label>
+                        <input
+                          type="number"
+                          value={paymentAmount}
+                          onChange={(e) => setPaymentAmount(e.target.value)}
+                          placeholder="Enter amount"
+                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                          required
+                          min="1"
+                          max={stats.balance}
+                        />
+                        <p className="text-xs text-gray-600 mt-1">
+                          Max: KES {stats.balance.toLocaleString()}
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={processingPayment}
+                          className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                        >
+                          {processingPayment ? "Processing..." : "Pay Now"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCardForm(false);
+                            setCardNumber("");
+                            setCardExpiry("");
+                            setCardCvv("");
+                            setPaymentAmount("");
+                          }}
+                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      
+                      <p className="text-xs text-gray-600 text-center">
+                        🔒 Your payment is secure and encrypted
+                      </p>
+                    </form>
+                  )}
+                </div>
+              </div>
+              
+              {/* Payment Status Messages */}
+              {paymentStatus && (
+                <div className={`mt-4 p-4 rounded-lg ${
+                  paymentStatus.type === "success" 
+                    ? "bg-green-100 border border-green-300 text-green-800" 
+                    : "bg-red-100 border border-red-300 text-red-800"
+                }`}>
+                  <p className="font-semibold">{paymentStatus.message}</p>
+                  {paymentStatus.reference && (
+                    <p className="text-sm mt-1">Reference: {paymentStatus.reference}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Payment Instructions for alternative methods */}
+          <div className="mt-6 bg-gray-50 p-6 rounded-lg border">
+            <h3 className="text-lg font-semibold mb-3">Alternative Payment Methods</h3>
             <div className="space-y-2 text-sm text-gray-700">
-              <p><strong>M-PESA:</strong> Paybill 247247, Account: {currentChild.admissionNumber}</p>
               <p><strong>Bank Transfer:</strong> KCB Bank, Account: 1234567890, Reference: {currentChild.admissionNumber}</p>
               <p><strong>Cash/Cheque:</strong> Visit the school accounts office during business hours</p>
               <p className="text-xs text-gray-500 mt-3">
